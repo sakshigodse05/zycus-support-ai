@@ -1,0 +1,43 @@
+name: evals
+
+on: [push, pull_request]
+
+jobs:
+  eval-harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Verify no secrets are committed
+        run: |
+          if git ls-files | grep -qx ".env"; then
+            echo "::error::.env is tracked by git — secrets must never be committed."
+            exit 1
+          fi
+          echo "No .env in the repository."
+
+      - name: Import check (fails fast on a broken module)
+        run: python -c "import src.triage, src.account_brief, src.retriever, evals.run_evals"
+
+      - name: Run eval harness
+        env:
+          LLM_PROVIDER: groq
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python main.py evals
+
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: |
+            eval_report.md
+            eval_report.json
