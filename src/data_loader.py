@@ -1,11 +1,9 @@
-# Task 2, part A: src/data_loader.py
-#Before we can brief a TAM, we need to load accounts + find their tickets from the last 90 days. Small file, keeps Task 2 clean.
-
 """Loading and joining the mock dataset.
 
-Tickets reference accounts via `account_id`, but not every ticket's account
-exists in accounts.json (an intentional gap in the dataset). Every lookup here
-fails soft and explicitly, never with a KeyError.
+Tickets reference accounts via `account_id`, but that link is largely broken by
+design: tickets reference 484 distinct account ids, accounts.json holds 50, and
+only 4 of them overlap. Every lookup here fails soft and explicitly, never with
+a KeyError, and the join key actually used is reported to the caller.
 """
 from __future__ import annotations
 
@@ -44,6 +42,11 @@ def get_account(account_id: str) -> dict:
     return account
 
 
+def list_account_ids() -> List[str]:
+    """All known account ids (used by the UI dropdown and the eval harness)."""
+    return sorted(_account_map().keys())
+
+
 def _parse_ts(value: str) -> Optional[datetime]:
     try:
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
@@ -54,14 +57,13 @@ def _parse_ts(value: str) -> Optional[datetime]:
 def get_account_tickets(account_id: str, days: int = 90) -> List[dict]:
     """All tickets for an account created within the last `days`, newest first.
 
-    Join strategy — the dataset's `account_id` link is largely broken by design:
-    tickets reference 484 distinct account ids, accounts.json holds 50, and only
-    4 of them overlap. Joining on id alone would return an empty brief for 46 of
-    50 accounts. The `company` field, however, joins cleanly for all 50.
+    Join strategy — the dataset's `account_id` link is largely broken by design.
+    Joining on id alone would return an empty brief for 46 of 50 accounts. The
+    `company` field, however, joins cleanly for all 50.
 
     We therefore join on account_id first (the authoritative key when present)
     and fall back to an exact company-name match. The join key actually used is
-    reported to the caller so the degradation is visible, never silent.
+    attached to each ticket so the degradation is visible, never silent.
 
     The 90-day window is anchored to the newest ticket in the dataset rather than
     to wall-clock now: the data is static, so a wall-clock window would silently
