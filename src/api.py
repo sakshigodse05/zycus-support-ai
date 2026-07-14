@@ -3,6 +3,9 @@
 Run:  uvicorn src.api:app --reload
 Docs: http://127.0.0.1:8000/docs
 """
+
+from src.account_brief import generate_account_brief, render_markdown
+from src.data_loader import AccountNotFoundError, list_account_ids
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
@@ -53,4 +56,27 @@ def triage(request: TriageRequest) -> dict:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except LLMError as exc:
         raise HTTPException(status_code=503, detail=f"LLM unavailable: {exc}") from exc
+    
+    @app.get("/accounts")
+    def accounts() -> dict:
+     """List all known account ids (useful for the UI dropdown)."""
+    return {"account_ids": list_account_ids()}
+
+
+@app.get("/brief/{account_id}")
+def brief(account_id: str, format: str = "json") -> dict:
+    """Task 2 — generate a QBR-ready account health brief.
+
+    `format=markdown` returns the TAM-readable rendering.
+    """
+    try:
+        result = generate_account_brief(account_id)
+    except AccountNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except LLMError as exc:
+        raise HTTPException(status_code=503, detail=f"LLM unavailable: {exc}") from exc
+
+    if format == "markdown":
+        return {"account_id": account_id, "markdown": render_markdown(result)}
+    return result
     

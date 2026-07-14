@@ -1,11 +1,22 @@
 """Thin wrapper around the LLM providers.
 
 We call the HTTP endpoints directly with `requests` rather than pulling in a
-vendor SDK. This keeps the dependency tree tiny, makes `pip install` reliable,
-and lets us swap providers with a single env var (LLM_PROVIDER).
+vendor SDK. This keeps the dependency tree tiny, makes `pip install` reliable on
+any machine, and lets us swap providers with a single env var (LLM_PROVIDER).
+
+Two production concerns are handled here rather than in the callers:
+  * Determinism — enforced by an on-disk response cache (see below).
+  * Rate limits — exponential backoff on HTTP 429.
 """
+from __future__ import annotations
+
+import hashlib
 import json
+import os
 import re
+import time
+from pathlib import Path
+
 import requests
 
 from src.config import (
@@ -16,11 +27,53 @@ from src.config import (
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 REQUEST_TIMEOUT_S = 60
+MAX_RETRIES_429 = 4
+
+# On-disk response cache.
+#
+# Determinism (a hard Task 2 requirement) cannot be fully guaranteed by
+# temperature=0 and a seed alone: providers batch requests across GPUs and the
+# reduction order of floating-point operations varies between runs, so sampling
+# can differ at the margins. We therefore enforce determinism by construction —
+# an identical (provider, model, temperature, prompt) tuple always returns the
+# stored response. It also makes repeated eval runs free and rate-limit-proof.
+#
+# Set LLM_CACHE=0 in the environment to bypass the cache (e.g. to measure true
+# cold-start latency).
+CACHE_DIR = Path(__file__).resolve().parent.parent / ".cache" / "llm"
+CACHE_ENABLED = os.getenv("LLM_CACHE", "1") != "0"
 
 
 class LLMError(Exception):
     """Raised when the model cannot be reached or returns unusable output."""
 
+
+# --------------------------------------------------------------------------- #
+# Cache
+# --------------------------------------------------------------------------- #
+
+def _cache_key(prompt: str, temperature: float) -> str:
+    payload = f"{LLM_PROVIDER}|{GROQ_MODEL}|{GEMINI_MODEL}|{temperature}|{prompt}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _cache_get(key: str) -> str | None:
+    if not CACHE_ENABLED:
+        return None
+    path = CACHE_DIR / f"{key}.txt"
+    return path.read_text(encoding="utf-8") if path.exists() else None
+
+
+def _cache_put(key: str, value: str) -> None:
+    if not CACHE_ENABLED:
+        return
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    (CACHE_DIR / f"{key}.txt").write_text(value, encoding="utf-8")
+
+
+# --------------------------------------------------------------------------- #
+# Providers
+# --------------------------------------------------------------------------- #
 
 def _call_gemini(prompt: str, temperature: float) -> str:
     if not GEMINI_API_KEY:
@@ -30,7 +83,10 @@ def _call_gemini(prompt: str, temperature: float) -> str:
         headers={"x-goog-api-key": GEMINI_API_KEY, "Content-Type": "application/json"},
         json={
             "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": temperature, "maxOutputTokens": MAX_OUTPUT_TOKENS},
+            "generationConfig": {
+                "temperature": temperature,
+                "maxOutputTokens": MAX_OUTPUT_TOKENS,
+            },
         },
         timeout=REQUEST_TIMEOUT_S,
     )
@@ -62,15 +118,41 @@ def _call_groq(prompt: str, temperature: float) -> str:
 _PROVIDERS = {"gemini": _call_gemini, "groq": _call_groq}
 
 
+# --------------------------------------------------------------------------- #
+# Public API
+# --------------------------------------------------------------------------- #
+
 def ask_llm(prompt: str, temperature: float = TEMPERATURE) -> str:
-    """Send a prompt to the configured provider, get raw text back."""
+    """Send a prompt to the configured provider, get raw text back.
+
+    Cached by prompt hash (determinism), and retried with exponential backoff on
+    HTTP 429 (free-tier rate limits).
+    """
     call = _PROVIDERS.get(LLM_PROVIDER)
     if call is None:
         raise LLMError(f"Unknown LLM_PROVIDER '{LLM_PROVIDER}'. Use 'gemini' or 'groq'.")
-    try:
-        return call(prompt, temperature)
-    except requests.RequestException as exc:
-        raise LLMError(f"Network error calling {LLM_PROVIDER}: {exc}") from exc
+
+    key = _cache_key(prompt, temperature)
+    cached = _cache_get(key)
+    if cached is not None:
+        return cached
+
+    delay = 8.0
+    for attempt in range(MAX_RETRIES_429 + 1):
+        try:
+            result = call(prompt, temperature)
+            _cache_put(key, result)
+            return result
+        except LLMError as exc:
+            if "429" in str(exc) and attempt < MAX_RETRIES_429:
+                time.sleep(delay)
+                delay *= 1.5
+                continue
+            raise
+        except requests.RequestException as exc:
+            raise LLMError(f"Network error calling {LLM_PROVIDER}: {exc}") from exc
+
+    raise LLMError("Exhausted retries against the provider rate limit.")
 
 
 def _extract_json(text: str) -> str:
