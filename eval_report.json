@@ -1,0 +1,589 @@
+{
+  "summary": {
+    "generated_at": "2026-07-14T07:11:28+00:00",
+    "prompt_versions": "triage/v1.0.0, risk/v1.0.0, brief/v1.0.0",
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "pass_rate": 1.0,
+    "mean_quality": 0.9187500000000001,
+    "adversarial_total": 2,
+    "adversarial_passed": 2
+  },
+  "results": [
+    {
+      "id": "T1-01-p1-outage",
+      "task": "task1",
+      "adversarial": false,
+      "description": "Production outage, no workaround, many users blocked -> must be P1.",
+      "passed": true,
+      "quality_score": 0.95,
+      "checks": [
+        {
+          "check": "category_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "urgency_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "responder_team_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "reasoning_present",
+          "passed": true
+        },
+        {
+          "check": "urgency in ['P1']",
+          "passed": true
+        },
+        {
+          "check": "category in ['Bug', 'Performance', 'Integration']",
+          "passed": true
+        },
+        {
+          "check": "product == DataBridge Pro",
+          "passed": true
+        },
+        {
+          "check": "confidence >= 0.6",
+          "passed": true
+        },
+        {
+          "check": "cites a knowledge-base doc",
+          "passed": true
+        },
+        {
+          "check": "draft response >= 80 chars",
+          "passed": true
+        },
+        {
+          "check": "cited doc was actually retrieved (no hallucination)",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.8,
+        "justification": "The response acknowledges the specific issue, mentions a concrete next step, and requests additional details without inventing facts or promising a fix date. However, the phrase 'we will provide updates as soon as possible' could be seen as slightly vague."
+      },
+      "observed": {
+        "category": "Bug",
+        "urgency": "P1",
+        "product": "DataBridge Pro",
+        "responder_team": "Tier-2 Support",
+        "confidence": 0.9,
+        "matched_kb_doc": "troubleshooting/performance-and-integrations.md"
+      },
+      "latency_ms": 1752
+    },
+    {
+      "id": "T1-02-billing-invoice",
+      "task": "task1",
+      "adversarial": false,
+      "description": "Invoice question -> Billing category, Billing Team, low urgency.",
+      "passed": true,
+      "quality_score": 0.95,
+      "checks": [
+        {
+          "check": "category_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "urgency_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "responder_team_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "reasoning_present",
+          "passed": true
+        },
+        {
+          "check": "urgency in ['P3', 'P4']",
+          "passed": true
+        },
+        {
+          "check": "category in ['Billing']",
+          "passed": true
+        },
+        {
+          "check": "team in ['Billing Team']",
+          "passed": true
+        },
+        {
+          "check": "confidence >= 0.6",
+          "passed": true
+        },
+        {
+          "check": "cited doc was actually retrieved (no hallucination)",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.8,
+        "justification": "The response acknowledges the specific issue with the invoice and seat count, and states a concrete next step by mentioning that the billing team will review the account and provide a detailed explanation. However, the phrase 'we will be in touch with you shortly' could be seen as slightly vague, as it does not specify a clear timeline or method of follow-up."
+      },
+      "observed": {
+        "category": "Billing",
+        "urgency": "P4",
+        "product": "Unknown",
+        "responder_team": "Billing Team",
+        "confidence": 0.8,
+        "matched_kb_doc": "billing/billing-and-plans.md"
+      },
+      "latency_ms": 1733
+    },
+    {
+      "id": "T1-03-feature-request",
+      "task": "task1",
+      "adversarial": false,
+      "description": "Missing functionality with a workaround -> Feature Request, Product Team.",
+      "passed": true,
+      "quality_score": 0.85,
+      "checks": [
+        {
+          "check": "category_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "urgency_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "responder_team_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "reasoning_present",
+          "passed": true
+        },
+        {
+          "check": "urgency in ['P3', 'P4']",
+          "passed": true
+        },
+        {
+          "check": "category in ['Feature Request']",
+          "passed": true
+        },
+        {
+          "check": "team in ['Product Team']",
+          "passed": true
+        },
+        {
+          "check": "cited doc was actually retrieved (no hallucination)",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.4,
+        "justification": "The response acknowledges the customer's issue and mentions a next step (reviewing the request), but it is somewhat generic and does not provide a specific or concrete action plan. It also uses vague phrases like 'consider it for future development' and 'keep you updated on any progress' without providing a clear timeline or point of contact for follow-up."
+      },
+      "observed": {
+        "category": "Feature Request",
+        "urgency": "P4",
+        "product": "AnalyticsHub",
+        "responder_team": "Product Team",
+        "confidence": 0.9,
+        "matched_kb_doc": null
+      },
+      "latency_ms": 21570
+    },
+    {
+      "id": "T1-04-howto-sso",
+      "task": "task1",
+      "adversarial": false,
+      "description": "Guidance request -> How-To, low urgency, should ground in the SSO doc.",
+      "passed": true,
+      "quality_score": 0.9,
+      "checks": [
+        {
+          "check": "category_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "urgency_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "responder_team_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "reasoning_present",
+          "passed": true
+        },
+        {
+          "check": "urgency in ['P3', 'P4']",
+          "passed": true
+        },
+        {
+          "check": "category in ['How-To', 'Onboarding']",
+          "passed": true
+        },
+        {
+          "check": "cites a knowledge-base doc",
+          "passed": true
+        },
+        {
+          "check": "cited doc was actually retrieved (no hallucination)",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.6,
+        "justification": "The response acknowledges the customer's issue with SAML SSO configuration for SecureVault and mentions providing guidance and relevant resources. However, it is somewhat generic and does not specify a concrete next step beyond 'responding with more information'."
+      },
+      "observed": {
+        "category": "How-To",
+        "urgency": "P4",
+        "product": "SecureVault",
+        "responder_team": "Tier-1 Support",
+        "confidence": 0.9,
+        "matched_kb_doc": "products/securevault.md"
+      },
+      "latency_ms": 9771
+    },
+    {
+      "id": "T1-05-data-loss",
+      "task": "task1",
+      "adversarial": false,
+      "description": "Missing records -> Data Loss, high urgency, Data Recovery Team.",
+      "passed": true,
+      "quality_score": 0.95,
+      "checks": [
+        {
+          "check": "category_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "urgency_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "responder_team_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "reasoning_present",
+          "passed": true
+        },
+        {
+          "check": "urgency in ['P1', 'P2']",
+          "passed": true
+        },
+        {
+          "check": "category in ['Data Loss', 'Bug']",
+          "passed": true
+        },
+        {
+          "check": "team in ['Data Recovery Team', 'Tier-2 Support']",
+          "passed": true
+        },
+        {
+          "check": "cited doc was actually retrieved (no hallucination)",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.8,
+        "justification": "The response acknowledges the specific issue with missing records in SecureVault, expresses understanding of the urgency, and states a concrete next step to investigate the cause and work on a recovery plan. However, the phrase 'we will be in touch soon' is somewhat vague and could be improved for clarity."
+      },
+      "observed": {
+        "category": "Data Loss",
+        "urgency": "P1",
+        "product": "SecureVault",
+        "responder_team": "Data Recovery Team",
+        "confidence": 0.9,
+        "matched_kb_doc": null
+      },
+      "latency_ms": 9570
+    },
+    {
+      "id": "T1-06-ADVERSARIAL-vague",
+      "task": "task1",
+      "adversarial": true,
+      "description": "ADVERSARIAL \u2014 near-empty, ambiguous ticket. The system must NOT invent a confident classification. It must lower confidence, flag for human review, ask clarifying questions, and refuse to cite a KB doc it cannot support.",
+      "passed": true,
+      "quality_score": 0.8,
+      "checks": [
+        {
+          "check": "category_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "urgency_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "responder_team_is_valid_enum",
+          "passed": true
+        },
+        {
+          "check": "reasoning_present",
+          "passed": true
+        },
+        {
+          "check": "confidence <= 0.5",
+          "passed": true
+        },
+        {
+          "check": "flagged for human review",
+          "passed": true
+        },
+        {
+          "check": "asks >= 1 clarifying question(s)",
+          "passed": true
+        },
+        {
+          "check": "refuses to cite a KB doc it cannot support",
+          "passed": true
+        },
+        {
+          "check": "cited doc was actually retrieved (no hallucination)",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.2,
+        "justification": "The response is generic and does not acknowledge a specific issue. It only asks for more information, which is a reasonable next step, but the language used is vague and does not provide any concrete details about how the issue will be addressed."
+      },
+      "observed": {
+        "category": "Bug",
+        "urgency": "P4",
+        "product": "Unknown",
+        "responder_team": "Tier-1 Support",
+        "confidence": 0.2,
+        "matched_kb_doc": null
+      },
+      "latency_ms": 9662
+    },
+    {
+      "id": "T2-01-high-volume-account",
+      "task": "task2",
+      "adversarial": false,
+      "description": "Account with 17 tickets in 90d -> substantive brief, all quotes verified.",
+      "passed": true,
+      "quality_score": 0.925,
+      "checks": [
+        {
+          "check": "executive_summary present",
+          "passed": true
+        },
+        {
+          "check": "talking_points present",
+          "passed": true
+        },
+        {
+          "check": "risk section present (may be empty list)",
+          "passed": true
+        },
+        {
+          "check": "analysed >= 5 tickets",
+          "passed": true
+        },
+        {
+          "check": "summary is 3-6 sentences (got 3)",
+          "passed": true
+        },
+        {
+          "check": "3-5 talking points (got 3)",
+          "passed": true
+        },
+        {
+          "check": "every flagged risk carries a verified verbatim quote",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.7,
+        "justification": "The first two talking points are specific and actionable, referencing concrete issues, numbers, and events, such as the 5300 missing records and the 396 affected users. However, the third point is more generic and open-ended, which prevents the overall score from being higher."
+      },
+      "observed": {
+        "tickets_analysed": 17,
+        "join_key_used": "company",
+        "risks_flagged": 3,
+        "risks_rejected_unverified": 1
+      },
+      "latency_ms": 49
+    },
+    {
+      "id": "T2-02-at-risk-account",
+      "task": "task2",
+      "adversarial": false,
+      "description": "At Risk account -> must surface at least one risk signal with a quote.",
+      "passed": true,
+      "quality_score": 0.925,
+      "checks": [
+        {
+          "check": "executive_summary present",
+          "passed": true
+        },
+        {
+          "check": "talking_points present",
+          "passed": true
+        },
+        {
+          "check": "risk section present (may be empty list)",
+          "passed": true
+        },
+        {
+          "check": "summary is 3-99 sentences (got 5)",
+          "passed": true
+        },
+        {
+          "check": "3-99 talking points (got 3)",
+          "passed": true
+        },
+        {
+          "check": "every flagged risk carries a verified verbatim quote",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.7,
+        "justification": "The output references specific issues like 'DataBridge Pro slowdown' and '7 open tickets', providing concrete context for the talking points, but could be more detailed with exact ticket numbers or events."
+      },
+      "observed": {
+        "tickets_analysed": 1,
+        "join_key_used": "account_id",
+        "risks_flagged": 3,
+        "risks_rejected_unverified": 0
+      },
+      "latency_ms": 2551
+    },
+    {
+      "id": "T2-03-determinism",
+      "task": "task2",
+      "adversarial": false,
+      "description": "Same account run twice -> byte-identical brief (hard task requirement).",
+      "passed": true,
+      "quality_score": 0.925,
+      "checks": [
+        {
+          "check": "executive_summary present",
+          "passed": true
+        },
+        {
+          "check": "talking_points present",
+          "passed": true
+        },
+        {
+          "check": "risk section present (may be empty list)",
+          "passed": true
+        },
+        {
+          "check": "identical output on re-run (determinism)",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.7,
+        "justification": "The first two talking points are specific and actionable, referencing concrete issues, numbers, and events, such as the 5300 missing records and the 396 affected users. However, the third point is more generic and open-ended, which prevents the overall score from being higher."
+      },
+      "observed": {
+        "tickets_analysed": 17,
+        "join_key_used": "company",
+        "risks_flagged": 3,
+        "risks_rejected_unverified": 1
+      },
+      "latency_ms": 2
+    },
+    {
+      "id": "T2-04-quote-grounding",
+      "task": "task2",
+      "adversarial": false,
+      "description": "Every flagged risk quote must appear verbatim in the source text.",
+      "passed": true,
+      "quality_score": 0.925,
+      "checks": [
+        {
+          "check": "executive_summary present",
+          "passed": true
+        },
+        {
+          "check": "talking_points present",
+          "passed": true
+        },
+        {
+          "check": "risk section present (may be empty list)",
+          "passed": true
+        },
+        {
+          "check": "every flagged risk carries a verified verbatim quote",
+          "passed": true
+        },
+        {
+          "check": "every risk source is a real ticket id or escalation_note",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.7,
+        "justification": "The first two talking points are specific and actionable, referencing concrete issues, numbers, and events, such as the 5300 missing records and the 396 affected users. However, the third point is more generic and open-ended, which prevents the overall score from being higher."
+      },
+      "observed": {
+        "tickets_analysed": 17,
+        "join_key_used": "company",
+        "risks_flagged": 3,
+        "risks_rejected_unverified": 1
+      },
+      "latency_ms": 2
+    },
+    {
+      "id": "T2-05-structure",
+      "task": "task2",
+      "adversarial": false,
+      "description": "Output must always carry all three required sections.",
+      "passed": true,
+      "quality_score": 0.925,
+      "checks": [
+        {
+          "check": "executive_summary present",
+          "passed": true
+        },
+        {
+          "check": "talking_points present",
+          "passed": true
+        },
+        {
+          "check": "risk section present (may be empty list)",
+          "passed": true
+        },
+        {
+          "check": "all three required sections present",
+          "passed": true
+        }
+      ],
+      "judge": {
+        "score": 0.7,
+        "justification": "The output references specific issues like 'DataBridge Pro slowdown' and '7 open tickets', providing concrete context for the talking points, but could be more detailed with exact ticket numbers or events."
+      },
+      "observed": {
+        "tickets_analysed": 1,
+        "join_key_used": "account_id",
+        "risks_flagged": 3,
+        "risks_rejected_unverified": 0
+      },
+      "latency_ms": 22
+    },
+    {
+      "id": "T2-06-ADVERSARIAL-unknown-account",
+      "task": "task2",
+      "adversarial": true,
+      "description": "ADVERSARIAL \u2014 account id that does not exist in accounts.json. The system must raise AccountNotFoundError cleanly, not hallucinate a brief for a fictional customer.",
+      "passed": true,
+      "quality_score": 1.0,
+      "checks": [
+        {
+          "check": "raises AccountNotFoundError for unknown id",
+          "passed": true
+        }
+      ],
+      "latency_ms": 0
+    }
+  ]
+}
